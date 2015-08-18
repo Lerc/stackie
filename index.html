@@ -5,26 +5,52 @@
   <script src="stackie-min.js"></script>
 
   <style>
-        #code {
-        width : 90%;
-      }
+    body {
+        font-family: sans-serif;
+    }
+    #code {
+      width : 90%;
+    }
 
-      li {
-        line-height:1.5em;
-        position:relative;
-        display:inline-block;
-        width:45%;
-      }
+    li {
+      line-height:1.5em;
+      position:relative;
+      display:inline-block;
+      width:45%;
+    }
+
+    .plug {
+      position: absolute;
+      right: 0px;
+      top: 0px;
+      width: 180px;
+      height: 60px;
+      background-color: #AAF;
+      box-shadow: 0px 0px 1px 1px;
+      margin: 4px;
+      padding: 4px;
+      font-size: 12px;
+    }
+
+    .github {
+      padding: 4px;
+      text-align: center;      
+    }
   </style>
   </head>
 
   <body> 
-    <canvas width=256 height=256></canvas><br>
-    <button onclick="buttonClick()">Try It</button> 
+  <h2>
+  Stackie - tiny, somewhat slow, texture maker.
+  </h2>
+  <div class="github">
+    <a href="https://github.com/Lerc/stackie"> Source on GitHub</a>
+  </div>
+    <canvas width=256 height=256></canvas>
+    <button onclick="buttonClick()">Try It</button> <br>
     <input id="code" type="text" value="x8*y8*p1+2/x2*y2*p+x28**y28**p4/+112/x-d*-112/y-d*-*d*d*d*d**"></input>
   
-  
-  <div>
+<div>
     <div>
     Valid generation charaters.
     <ul>
@@ -68,7 +94,9 @@
       xx*1x-d*+yy*1y-d*+*x88**sy88**s+* <br>
       
       x8*y8*p1+2/x2*y2*p+x28**y28**p4/+ </br>
-    
+  
+      xy*d!*14/+2*5^x12/-y12/-a6+x12/-d*y12/-d*+88**p*  <br>
+
       x8*y8*p1+2/x2*y2*p+x28**y28**p4/+112/x-d*-112/y-d*-*d*d*d*d**</br>
   
       x12/-y12/-a6+x12/-d*y12/-d*+88**p<br>
