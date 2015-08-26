@@ -74,14 +74,14 @@ to  generate and extract the image.  This lets you reuse the same allocated fiel
 images.   A simpler approach is to just use Stacky.generate() which you can pass image code and palette code and a ImageData object is returned ready for use by putImageData.
 
 ```javascript
-  //make a field and fill it
-  var f=Stackie.makeField(256,256);
-  f.generate(Stackie.program("x8*y8*p1+2/x2*y2*p+x28**y28**p4/+112/x-d*-112/y-d*-*d*d*d*d**"));
-  var smoke = f.getImageData();
-  
-  //shorthand approach.  Just give me the ImageData. 
-  var flame=Stackie.generate("x1x-*5*dx4**y3*p+y!-","xy!1+*");
-	canvasctx.putImageData(image,0,0); 
+	//make a field and fill it
+	var f=Stackie.makeField(256,256);
+	f.generate(Stackie.program("x8*y8*p1+2/x2*y2*p+x28**y28**p4/+112/x-d*-112/y-d*-*d*d*d*d**"));
+	var smoke = f.getImageData();
+
+	//shorthand approach.  Just give me the ImageData. 
+	var flame=Stackie.generate("x1x-*5*dx4**y3*p+y!-","xy!1+*");
+	canvas_ctx.putImageData(image,0,0); 
 ``` 
 
 
