@@ -22,6 +22,10 @@
 	position:absolute;
   top:24px;
 }
+#imageurl {
+	position:absolute;
+	bottom:100%;
+}
 .right {
   height:332px;
   width:400px;
@@ -43,8 +47,10 @@
 .middle>ul {
   padding:1px;
   margin: 0 auto;
-  columns: 3;
+  -webkit-columns: 2;
   -moz-columns: 2;
+  columns: 2;
+
 }
 .middle>ul>li {
   display:block;
@@ -134,7 +140,9 @@ button.seed {
   Stackie - tiny, somewhat slow, texture maker.
   </h2>
 <div class="meep">
+
   <div class="box left">
+    <div id="imageurl"></div>
     <button onclick="generateLink()">Generate link for this image</button>
     <canvas id="imageout" width=256 height=256></canvas></div>
   <div class="box control">
@@ -211,6 +219,7 @@ button.seed {
 <script>
 var canvas = document.getElementById("imageout");
 var seedInput =  document.getElementById("seed");
+var imageURL =  document.getElementById("imageurl");
 
 var imageCode ="x";
 var paletteCode ="x";
@@ -232,7 +241,9 @@ function handleKeyDown(e) {
 }
 function generateLink() {
   var base = location.protocol+"//"+location.host+location.pathname;
-   alert(base+"?code="+encodeURIComponent(imageCode)+"&palette="+encodeURIComponent(paletteCode)+"&seed="+encodeURIComponent(randSeed));
+  var url= base+"?code="+encodeURIComponent(imageCode)+"&palette="+encodeURIComponent(paletteCode)+"&seed="+encodeURIComponent(randSeed)
+   //alert();
+   imageURL.innerHTML='<a href="'+url+'">[Image Link]</a>';
 }
 
 function generateImage() {
