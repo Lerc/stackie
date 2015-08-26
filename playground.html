@@ -104,6 +104,26 @@ button.seed {
   top:100px;
   text-align:right;
 }
+    .pl-k {
+      color: #c00;
+    }
+    .pl-c1 {
+      color: #33c;
+    }
+    .pl-s {
+      color: #008;
+    }
+    .tips {
+      background-color:#efe;
+      overflow: auto;
+      border: 1px solid black;
+      margin-top:40px;
+      margin-left:20%;
+      margin-right:20%;
+    }
+    .tips>h3 {
+    	text-align: center;
+    }
    </style>
   </head>
   <body>
@@ -177,6 +197,17 @@ button.seed {
   </div>
 </div>
 
+<div class="tips">
+<h3> This is how you use it in a program </h3>
+<div class="highlight highlight-javascript"><pre>  <span class="pl-c">//make a field and fill it</span>
+  <span class="pl-k">var</span> f<span class="pl-k">=</span>Stackie.<span class="pl-c1">makeField</span>(<span class="pl-c1">256</span>,<span class="pl-c1">256</span>);
+  f.<span class="pl-c1">generate</span>(Stackie.<span class="pl-c1">program</span>(<span class="pl-s"><span class="pl-pds">"</span>x8*y8*p1+2/x2*y2*p+x28**y28**p4/+112/x-d*-112/y-d*-*d*d*d*d**<span class="pl-pds">"</span></span>));
+  <span class="pl-k">var</span> smoke <span class="pl-k">=</span> f.<span class="pl-c1">getImageData</span>();
+
+  <span class="pl-c">//shorthand approach.  Just give me the ImageData. </span>
+  <span class="pl-k">var</span> flame<span class="pl-k">=</span>Stackie.<span class="pl-c1">generate</span>(<span class="pl-s"><span class="pl-pds">"</span>x1x-*5*dx4**y3*p+y!-<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>xy!1+*<span class="pl-pds">"</span></span>);
+  canvas_ctx.<span class="pl-c1">putImageData</span>(image,<span class="pl-c1">0</span>,<span class="pl-c1">0</span>); </pre></div>
+</div>
 <script>
 var canvas = document.getElementById("imageout");
 var seedInput =  document.getElementById("seed");
