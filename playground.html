@@ -2,7 +2,7 @@
 <html>
   <head>
   <meta charset='utf-8'>
-  <script src="stackie.js"></script>
+  <script src="stackie-min.js"></script>
   <style>
   .meep {
   height : 336px;
@@ -192,8 +192,8 @@ button.seed {
     </div>
   </div>
   <div class="codelines box">
-    <div><input id="imagecode" class="image code">Image code </input></div>
-    <input id="palettecode" class="palette code">Palette Code </input>
+    <div><input id="imagecode" class="image code" value="xy*">Image code </input></div>
+    <input id="palettecode" class="palette code" value="x">Palette Code </input>
   </div>
 </div>
 
@@ -220,8 +220,6 @@ var paletteCodeInput =  document.getElementById("palettecode");
 
 var ctx=canvas.getContext("2d");
 
-var image=new ImageData(256,256); image=Stackie.generate("x1x-*5*dx4**y3*p+y!-","xy!1+*");
-ctx.putImageData(image,0,0);
 
 imageCodeInput.addEventListener("keydown",handleKeyDown);
 paletteCodeInput.addEventListener("keydown",handleKeyDown);
@@ -284,13 +282,13 @@ function getQueryVariable(variable)
   }
 
   if (querySeed)  { 
-    seedInput.value=decodeURIComponent(queryPalette);      
+    seedInput.value=decodeURIComponent(querySeed);      
   }
 
   if (queryCode)  { 
     imageCodeInput.value=decodeURIComponent(queryCode);
-    generateImage();      
   }
+  generateImage();      
 
 </script>
 
