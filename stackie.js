@@ -2,6 +2,7 @@ var Stackie = function() {
   var API={};
   var random;    
   var gradient; 
+  var m=Math;   //minification will reduce this to one char;
 
   function setSeed(seed) {
      random=makeRandom(seed);
@@ -11,11 +12,11 @@ var Stackie = function() {
   setSeed(42);
 
   function makePerlinGradient(w,h)   {
-    result= new Float32Array(w*h*2);
+    var result= new Float32Array(w*h*2);
     for (var i=0;i<w*h*2;i+=2) {
-      var r=(random()*Math.PI*2);    
-      result[i] = Math.sin(r);
-      result[i+1] = Math.cos(r);
+      var r=(random()*m.PI*2);    
+      result[i] = m.sin(r);
+      result[i+1] = m.cos(r);
     }
     return(result);
   }
@@ -35,10 +36,9 @@ var Stackie = function() {
         }
       }    
     }
-    var grey = makePaletteMapper("x");
 
     function getImageData(map) {
-      map=map||grey;
+      map=map||makePaletteMapper("x");
       var image=new ImageData(w,h);
       var pixels= new Uint32Array(image.data.buffer);
       for (var i=0; i<pixels.length; i++) {
@@ -57,9 +57,11 @@ var Stackie = function() {
     var state;
     function push(v){state.push(v)};
     function pop(){return state.pop()};
-
-    function bi(fn) { return function() {var b=pop(); push(fn(pop(),b));}}
-    function un(fn) { return function() { push(fn(pop()));} }
+    function stackOp(argc,fn) {
+       return function () {push(fn.apply(null,state.splice(-argc,argc)))};
+    }
+    function bi(fn) { return function (){var b=pop(); push(fn(pop(),b));}}
+    function un(fn) { return function (){push(fn(pop()));}}
     function p(v) { return function() { push(v); } }
     function pushStateVar(name) { return function () {push(state[name]);}}
     var ops={
@@ -71,18 +73,21 @@ var Stackie = function() {
       "-": bi(function(a,b){return a-b}),
       "+": bi(function(a,b){return a+b}),
       "p": bi(perlin),
-      "s": un(Math.sin),
-      "c": un(Math.cos),
-      "q": un(Math.sqrt),
-      "a": bi(Math.atan2),
+      "w": stackOp(3,perlin),
+      "W": stackOp(4,perlin),
+      "s": un(m.sin),
+      "c": un(m.cos),
+      "q": un(m.sqrt),
+      "a": bi(m.atan2),
       "r": un(random),
-      "<": bi(Math.min),
-      ">": bi(Math.max),
-      "l": un(Math.log),
-      "^": bi(Math.pow),
-      "P": p(Math.PI),
-      "~": un(Math.abs),
+      "<": bi(m.min),
+      ">": bi(m.max),
+      "l": un(m.log),
+      "^": bi(m.pow),
+      "P": p(m.PI),
+      "~": un(m.abs),
       "!": un(function(x){return 1-x}),
+      "?": un(function(x){return x<=0?0:1}),
       ":": (function() {var a=pop();var b=pop();push(a); push(b);}),
       ";": (function() {var a=pop();var b=pop();var c=pop();push(a); push(b); push(c);}),
 
@@ -114,7 +119,7 @@ var Stackie = function() {
     return v<0?0:v>1?1:v;
   }
   function byteSize(v) {
-    return Math.floor(clamp(v)*255);
+    return m.floor(clamp(v)*255);
   }
 
   function makePaletteMapper(code) {
@@ -133,6 +138,7 @@ var Stackie = function() {
   }
 
 /*
+  //this is the old form of stackie where the ops map was created on every pixel call.
   function stacky(x,y,t,code) {
     var s=[];
     function bi(fn) { return function() { var b=s.pop(); s.push(fn(s.pop(),b)); } }
@@ -147,17 +153,17 @@ var Stackie = function() {
       "-": bi(function(a,b){return a-b}),
       "+": bi(function(a,b){return a+b}),
       "p": bi(perlin),
-      "s": un(Math.sin),
-      "c": un(Math.cos),
-      "q": un(Math.sqrt),
-      "a": bi(Math.atan2),
+      "s": un(m.sin),
+      "c": un(m.cos),
+      "q": un(m.sqrt),
+      "a": bi(m.atan2),
       "r": un(random),
-      "<": bi(Math.min),
-      ">": bi(Math.max),
-      "l": un(Math.log),
-      "^": bi(Math.pow),
-      "P": p(Math.PI),
-      "~": un(Math.abs),
+      "<": bi(m.min),
+      ">": bi(m.max),
+      "l": un(m.log),
+      "^": bi(m.pow),
+      "P": p(m.PI),
+      "~": un(m.abs),
       "!": un(function(x){return 1-x}),
       ":": (function() {var a=s.pop();var b=s.pop();s.push(a); s.push(b);}),
       ";": (function() {s=s.concat(s.splice(-3,3).reverse());}),
@@ -174,20 +180,26 @@ var Stackie = function() {
      return function (x,y) {return stacky(x,y,code)}
   }
 */
-  function perlin(x,y) {
-    x=x%256;
-    y=y%256;
+  function perlin(x,y,wrapX,wrapY) {
+    function positiveMod(v,size) {
+      v%=size;
+      return v<0?size-v:v;
+    }
+    wrapX = wrapX || 256;
+    wrapY = wrapY || wrapX;
+
     function ss(a,b,v) {var w = v*v*v*(v*(v*6-15)+10);  return (1.0-w)*a + (w*b); }
     function dg(ix,iy) {
-      var gi=(iy*256+ix)*2;
+      var gi=(positiveMod(iy,wrapY)*wrapX+positiveMod(ix,wrapX))*2;
       return ((x-ix)*gradient[gi]) + ((y-iy)*gradient[gi+1]);
     }
-    var u=x&0xff;
-    var v=y&0xff;
-    var u1=(u+1)&0xff;
-    var v1=(v+1)&0xff;
+
+    var u=m.floor(x);
+    var v=m.floor(y);
     var sx=x-u; 
     var sy=y-v;
+    var u1=(u+1);
+    var v1=(v+1);
     return ss(ss(dg(u,v),dg(u1,v),sx),ss(dg(u,v1),dg(u1,v1),sx),sy);
   }
 
@@ -198,7 +210,7 @@ var Stackie = function() {
     function random () {
       mz=36969 * (mz&0xffff) + (mz >> 16);
       mw=18000 * (mw&0xffff) + (mw >> 16);
-      return (((mz<<16) + mw) &0xffffffff ) / (0x100000000);
+      return (((mz<<16) + mw) &0x7fffffff ) / (0x80000000);
     }
     return random;
   }
