@@ -1,7 +1,8 @@
 var Stackie = function() {
   var API={};
   var random;    
-  var gradient; 
+  var gradient;
+  var variables="tuvxyz";
   var m=Math;   //minification will reduce this to one char;
 
   function setSeed(seed) {
@@ -65,9 +66,8 @@ var Stackie = function() {
     function p(v) { return function() { push(v); } }
     function pushStateVar(name) { return function () {push(state[name]);}}
     var ops={
-      "x": pushStateVar("x"),
-      "y": pushStateVar("y"),
-      "t": pushStateVar("t"),
+      //"x": pushStateVar("x"),"y": pushStateVar("y"),"t": pushStateVar("t"),
+
       "*": bi(function(a,b){return a*b}),    
       "/": bi(function(a,b){return a/b}),    
       "-": bi(function(a,b){return a-b}),
@@ -79,13 +79,14 @@ var Stackie = function() {
       "c": un(m.cos),
       "q": un(m.sqrt),
       "a": bi(m.atan2),
-      "r": un(random),
+      "r": stackOp(0,random),
       "<": bi(m.min),
       ">": bi(m.max),
       "l": un(m.log),
       "^": bi(m.pow),
       "P": p(m.PI),
       "~": un(m.abs),
+      "#": un(m.round),
       "!": un(function(x){return 1-x}),
       "?": un(function(x){return x<=0?0:1}),
       ":": (function() {var a=pop();var b=pop();push(a); push(b);}),
@@ -95,6 +96,8 @@ var Stackie = function() {
       "d": (function() {var a=pop();push(a); push(a);})
     }
     for (var d=0; d<10;d++) { ops[""+d]=p(d); }
+    for (var v in variables) ops[variables[v]]=pushStateVar(variables[v]);
+
 
     function op(programState,opcode) {
       state=programState;
