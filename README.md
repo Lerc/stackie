@@ -9,6 +9,11 @@ Today, I coded it.
 
 As it stands, the minified javascript is 2531 bytes and it can generate ImageData textures from short strings. Chrome seems to be a bit slower than FireFox at running the code.  That FireFox runs it so well is a credit to their optimisers.
 
+Here it is in action http://fingswotidun.com/stackie/?code=x1x-*5*dx4**y3*p%2By!-&palette=xy!1%2B*&seed=877588
+
+Or if you prefer something nice and abstract
+http://fingswotidun.com/stackie/?code=yx%2F1%3Cx!-~qq&palette=xyp1%2B2%2Fx*&seed=351589
+
 There is a doubly minified version that constructs itself by string substitution and eval-ing the result.  This doesn't gain you much if you are going by gzipped size but worth it if you are code golfing by file size.  It was constructed partly by hand so there is no guarantee that stackie-minmin.js will be up to date. 
 
 The design is sligtly similar to Ibniz except not focusing on live animation
