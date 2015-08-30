@@ -3,7 +3,6 @@ var Stackie = function() {
   var random;    
   var gradient;
   var variables="tuvxyz";
-  var m=Math;   //minification will reduce this to one char;
 
   function setSeed(seed) {
      random=makeRandom(seed);
@@ -15,9 +14,9 @@ var Stackie = function() {
   function makePerlinGradient(w,h)   {
     var result= new Float32Array(w*h*2);
     for (var i=0;i<w*h*2;i+=2) {
-      var r=(random()*m.PI*2);    
-      result[i] = m.sin(r);
-      result[i+1] = m.cos(r);
+      var r=(random()*Math.PI*2);    
+      result[i] = Math.sin(r);
+      result[i+1] = Math.cos(r);
     }
     return(result);
   }
@@ -67,7 +66,6 @@ var Stackie = function() {
     function pushStateVar(name) { return function () {push(state[name]);}}
     var ops={
       //"x": pushStateVar("x"),"y": pushStateVar("y"),"t": pushStateVar("t"),
-
       "*": bi(function(a,b){return a*b}),    
       "/": bi(function(a,b){return a/b}),    
       "-": bi(function(a,b){return a-b}),
@@ -75,29 +73,27 @@ var Stackie = function() {
       "p": bi(perlin),
       "w": stackOp(3,perlin),
       "W": stackOp(4,perlin),
-      "s": un(m.sin),
-      "c": un(m.cos),
-      "q": un(m.sqrt),
-      "a": bi(m.atan2),
+      "s": un(Math.sin),
+      "c": un(Math.cos),
+      "q": un(Math.sqrt),
+      "a": bi(Math.atan2),
       "r": stackOp(0,random),
-      "<": bi(m.min),
-      ">": bi(m.max),
-      "l": un(m.log),
-      "^": bi(m.pow),
-      "P": p(m.PI),
-      "~": un(m.abs),
-      "#": un(m.round),
+      "<": bi(Math.min),
+      ">": bi(Math.max),
+      "l": un(Math.log),
+      "^": bi(Math.pow),
+      "P": p(Math.PI),
+      "~": un(Math.abs),
+      "#": un(Math.round),
       "!": un(function(x){return 1-x}),
       "?": un(function(x){return x<=0?0:1}),
-      ":": (function() {var a=pop();var b=pop();push(a); push(b);}),
-      ";": (function() {var a=pop();var b=pop();var c=pop();push(a); push(b); push(c);}),
-
-      //";": (function() {s=s.concat(s.splice(-3,3).reverse());}),
+      ":": (function() {var a=pop(), b=pop();push(a); push(b);}),
+      ";": (function() {var a=pop(), b=pop(), c=pop();push(a); push(b); push(c);}),
       "d": (function() {var a=pop();push(a); push(a);})
     }
-    for (var d=0; d<10;d++) { ops[""+d]=p(d); }
     for (var v in variables) ops[variables[v]]=pushStateVar(variables[v]);
 
+    for (var i=0; i<10;i++) { ops[""+i]=p(i); }
 
     function op(programState,opcode) {
       state=programState;
@@ -122,13 +118,13 @@ var Stackie = function() {
     return v<0?0:v>1?1:v;
   }
   function byteSize(v) {
-    return m.floor(clamp(v)*255);
+    return Math.floor(clamp(v)*255);
   }
 
   function makePaletteMapper(code) {
       var paletteProgram=program(code);
       var palette=[];
-      for (i=0;i<256;i++){
+      for (var i=0;i<256;i++){
         var r= byteSize(paletteProgram(i/256,0.0));
         var g= byteSize(paletteProgram(i/256,0.5));
         var b= byteSize(paletteProgram(i/256,1.0));
@@ -156,17 +152,17 @@ var Stackie = function() {
       "-": bi(function(a,b){return a-b}),
       "+": bi(function(a,b){return a+b}),
       "p": bi(perlin),
-      "s": un(m.sin),
-      "c": un(m.cos),
-      "q": un(m.sqrt),
-      "a": bi(m.atan2),
+      "s": un(Math.sin),
+      "c": un(Math.cos),
+      "q": un(Math.sqrt),
+      "a": bi(Math.atan2),
       "r": un(random),
-      "<": bi(m.min),
-      ">": bi(m.max),
-      "l": un(m.log),
-      "^": bi(m.pow),
-      "P": p(m.PI),
-      "~": un(m.abs),
+      "<": bi(Math.min),
+      ">": bi(Math.max),
+      "l": un(Math.log),
+      "^": bi(Math.pow),
+      "P": p(Math.PI),
+      "~": un(Math.abs),
       "!": un(function(x){return 1-x}),
       ":": (function() {var a=s.pop();var b=s.pop();s.push(a); s.push(b);}),
       ";": (function() {s=s.concat(s.splice(-3,3).reverse());}),
@@ -197,8 +193,8 @@ var Stackie = function() {
       return ((x-ix)*gradient[gi]) + ((y-iy)*gradient[gi+1]);
     }
 
-    var u=m.floor(x);
-    var v=m.floor(y);
+    var u=Math.floor(x);
+    var v=Math.floor(y);
     var sx=x-u; 
     var sy=y-v;
     var u1=(u+1);
@@ -208,16 +204,16 @@ var Stackie = function() {
 
 
   function makeRandom(seed) {
-    var mw = seed & 0xffffffff;
+    var mw = seed & (bit30-1);
     var mz = 173;
     function random () {
       mz=36969 * (mz&0xffff) + (mz >> 16);
       mw=18000 * (mw&0xffff) + (mw >> 16);
-      return (((mz<<16) + mw) &0x7fffffff ) / (0x80000000);
+      return (((mz<<16) + mw) & (bit30-1) ) / (bit30);
     }
     return random;
   }
-
+  var bit30=1<<30;
   function generate(imageCode,paletteCode,size) {
     size=size||256;
     var f = new Field(size,size);
