@@ -156,6 +156,7 @@ button.seed {
           <li> <span class="opcode">x</span> : push x (x is in range 0...1) </li>
       <li> <span class="opcode">y</span> : push y (y is in range 0...1) </li>
       <li> <span class="opcode">0⋯9</span> : push constant 0...9 </li>
+      <li>  <span class="opcode">#</span> : round to nearest int </li>
       <li>  <span class="opcode">s</span> : sin </li>
       <li>  <span class="opcode">c</span> : cos </li>
       <li>  <span class="opcode">q</span> : sqrt </li>
@@ -163,6 +164,8 @@ button.seed {
       <li>  <span class="opcode">P</span> : push PI </li>
       <li>  <span class="opcode">d</span> : duplicate top of stack </li>
       <li>  <span class="opcode">p</span> : perlin noise (using top two stack values) </li>
+      <li>  <span class="opcode">w</span> : wrapping perlin( 3 stack values x,y,w) </li>
+      <li>  <span class="opcode">W</span> : wrapping perlin( 4 stack values x,y,wx,wy) </li>
       <li>  <span class="opcode">a</span> : atan2</li>
       <li>  <span class="opcode">+</span> : add </li>
       <li>  <span class="opcode">-</span> : subtract </li>
@@ -171,6 +174,8 @@ button.seed {
       <li> <span class="opcode">~</span> : abs </li>
       <li> <span class="opcode">^</span> : pow </li>
       <li> <span class="opcode">!</span> : push(1-pop()) </li>
+      <li> <span class="opcode">?</span> : push(0=>pop()0?0:1) </li>
+
       <li> <span class="opcode">&gt</span> : max </li>
       <li> <span class="opcode">&lt</span> : min </li>
       <li> <span class="opcode">:</span> : swap 1 and 2 on stack </li>
