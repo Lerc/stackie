@@ -7,7 +7,9 @@ At 4am I was lying in bed awake because my brain was designing a tiny texture ge
 
 Today, I coded it.
 
-As it stands, the minified javascript is 2334 bytes and it can generate ImageData textures from short strings. Chrome seems to be a bit slower than FireFox at running the code.  That FireFox runs it so well is a credit to their optimisers.
+As it stands, the minified javascript is 2531 bytes and it can generate ImageData textures from short strings. Chrome seems to be a bit slower than FireFox at running the code.  That FireFox runs it so well is a credit to their optimisers.
+
+There is a doubly minified version that constructs itself by string substitution and eval-ing the result.  This doesn't gain you much if you are going by gzipped size but worth it if you are code golfing by file size.  It was constructed partly by hand so there is no guarantee that stackie-minmin.js will be up to date. 
 
 The design is sligtly similar to Ibniz except not focusing on live animation
 
@@ -30,8 +32,13 @@ Instructions
      q : sqrt 
      ~ : abs 
      ! : flip        1-a                  implemented as  push(1-pop()) 
+     # : round to nearest integer
+     ? : threshold  ( value<=0 becomes 0, value>0 becomes 1 );  
 
      p : perlin noise (using top two stack values) 
+     w : wraparound perlin noise using three stack valuesx,y,size
+     W : wraparound perlin noise using 4 stack values x,y,x_size, y_size
+
      a : atan2 
      + : add 
      - : subtract 
