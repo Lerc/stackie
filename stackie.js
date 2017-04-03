@@ -1,32 +1,49 @@
-var Stackie = function() {
+var Stackie = ( ()=> {
   var API={};
+  var bit30=1<<30;
   var random;    
-  var gradient;
   var variables="tuvxyz";
+  var M=Math;
 
-  function setSeed(seed) {
-     random=makeRandom(seed);
-     gradient = makePerlinGradient(256,256);
+  var perlinGradientX;
+  var perlinGradientY;
+  
+  var makeRandom=seed=>{
+    var mw = seed & (bit30-1);
+    var mz = 173;
+    var random=()=>{
+      mz=36969 * (mz&0xffff) + (mz >> 16);
+      mw=18000 * (mw&0xffff) + (mw >> 16);
+      return (((mz<<16) + mw) & (bit30-1) ) / (bit30);
+    }
+    return random;
   }
+
+  var setSeed=seed=>{
+    random=makeRandom(seed);
+    var s=256;
+    var randoms= new Float32Array(s*s*2).map(random);
+    perlinGradientX=randoms.map(v=>M.sin(v*M.PI*2));
+    perlinGradientY=randoms.map(v=>M.cos(v*M.PI*2));
+  };
 
   setSeed(42);
 
-  function makePerlinGradient(w,h)   {
-    var result= new Float32Array(w*h*2);
-    for (var i=0;i<w*h*2;i+=2) {
-      var r=(random()*Math.PI*2);    
-      result[i] = Math.sin(r);
-      result[i+1] = Math.cos(r);
-    }
-    return(result);
-  }
 
-
-  function Field(w,h) {
+/**
+ * @constructor 
+*/
+  function Field(w=256,h=w) {
     var data=new Float32Array(w*h);
-    function getValue(x,y) { return data[y*w+x]; }
-    function setValue(x,y,value) { data[y*w+x]=value; }
+    var getValue=(x,y)=>data[y*w+x];
+    var setValue=(x,y,value)=>data[y*w+x]=value;
     
+    var generate = fn=>{
+      for (var tx=0, ty=0; ty<h ;tx=tx+1<w?tx+1:0, ty+=tx?0:1) {
+        setValue(tx,ty,fn(tx/w,ty/h));
+      }
+    }    
+    /*
     function generate(fn) {
       for (var ty=0;ty<h; ty++) {
         for (var tx=0;tx<w; tx++) {
@@ -36,165 +53,113 @@ var Stackie = function() {
         }
       }    
     }
-
-    function getImageData(map) {
-      map=map||makePaletteMapper("x");
+    */    
+    var getImageData=(map = makePaletteMapper("x"))=>{
       var image=new ImageData(w,h);
       var pixels= new Uint32Array(image.data.buffer);
+      data.forEach((m,i)=>pixels[i]=map(m));
+      /*
       for (var i=0; i<pixels.length; i++) {
         pixels[i]=map(data[i]);
       }
+      */
       return image;
     }
-    
-    this.get = getValue;
-    this.set = setValue;
-    this.getImageData = getImageData;
-    this.generate=generate;
+    var t=this;
+    t.get = getValue;
+    t.set = setValue;
+    t.getImageData = getImageData;
+    t.generate=generate;
   }
 
-  function makeOp() {
+  var makeOp= ()=>{
     var state;
-    function push(v){state.push(v)};
-    function pop(){return state.pop()};
-    function stackOp(argc,fn) {
-       return function () {push(fn.apply(null,state.splice(-argc,argc)))};
-    }
-    function bi(fn) { return function (){var b=pop(); push(fn(pop(),b));}}
-    function un(fn) { return function (){push(fn(pop()));}}
-    function p(v) { return function() { push(v); } }
-    function pushStateVar(name) { return function () {push(state[name]);}}
+    var push=v=>state.push(v);
+    var pop=()=>state.pop();
+
+    var stackOp=(argc,fn)=>( ()=>push(fn.apply(null,state.splice(-argc,argc))) );
+
+    var bi= fn=>(()=>{var b=pop(); push(fn(pop(),b));});
+    var un= fn=>( ()=>push(fn(pop())) );
+    var p= v=>( ()=>push(v));
+
+/*    
+    function bi(fn) { return ()=>{var b=pop(); push(fn(pop(),b));}}
+    function un(fn) { return ()=>push(fn(pop()));}
+    function p(v) { return ()=>push(v); }
+*/
+    var pushStateVar=name=>(()=>push(state[name]));
+
     var ops={
       //"x": pushStateVar("x"),"y": pushStateVar("y"),"t": pushStateVar("t"),
-      "*": bi(function(a,b){return a*b}),    
-      "/": bi(function(a,b){return a/b}),    
-      "-": bi(function(a,b){return a-b}),
-      "+": bi(function(a,b){return a+b}),
+      "*": bi((a,b)=>a*b),    
+      "/": bi((a,b)=>a/b),    
+      "-": bi((a,b)=>a-b),
+      "+": bi((a,b)=>a+b),
       "p": bi(perlin),
       "w": stackOp(3,perlin),
       "W": stackOp(4,perlin),
-      "s": un(Math.sin),
-      "c": un(Math.cos),
-      "q": un(Math.sqrt),
-      "a": bi(Math.atan2),
+      "s": un(M.sin),
+      "c": un(M.cos),
+      "q": un(M.sqrt),
+      "a": bi(M.atan2),
       "r": stackOp(0,random),
-      "<": bi(Math.min),
-      ">": bi(Math.max),
-      "l": un(Math.log),
-      "^": bi(Math.pow),
-      "P": p(Math.PI),
-      "~": un(Math.abs),
-      "#": un(Math.round),
-      "!": un(function(x){return 1-x}),
-      "?": un(function(x){return x<=0?0:1}),
-      ":": (function() {var a=pop(), b=pop();push(a); push(b);}),
-      ";": (function() {var a=pop(), b=pop(), c=pop();push(a); push(b); push(c);}),
-      "d": (function() {var a=pop();push(a); push(a);})
+      "<": bi(M.min),
+      ">": bi(M.max),
+      "l": un(M.log),
+      "^": bi(M.pow),
+      "P": p(M.PI),
+      "~": un(M.abs),
+      "#": un(M.round),
+      "!": un(x=>1-x),
+      "?": un(x=>x<=0?0:1),
+      ":": ()=> {var a=pop(), b=pop();push(a); push(b);},
+      ";": ()=> {var a=pop(), b=pop(), c=pop();push(a); push(b); push(c);},
+      "d": ()=> {var a=pop();push(a); push(a);}
     }
     for (var v in variables) ops[variables[v]]=pushStateVar(variables[v]);
 
     for (var i=0; i<10;i++) { ops[""+i]=p(i); }
 
-    function op(programState,opcode) {
-      state=programState;
-      ops[opcode]();
-    }
-    return op;
+    return (programState,opcode)=>{ state=programState; ops[opcode](); };
   }
 
-  function program(code) {
+  var program =code=>{
       var op=makeOp();
-      return function (x,y,t) {
+      return (x,y,t)=>{
         var state = [];  //{"stack":[], "x":x, "y":y, "t":1};
         state.x=x;
         state.y=y;
         state.t=t;
-        for (var i=0; i<code.length; i++) {op(state,code[i]);}
+        //for (var c=0; i<code.length; i++) {op(state,code[i]);}
+        for (var c of code) op(state,c);
         return state.pop();
       }
   }
+  var clamp=v=>v<0?0:v>1?1:v;
+  var byteSize=v=>M.floor(clamp(v)*255);
 
-  function clamp(v) {
-    return v<0?0:v>1?1:v;
-  }
-  function byteSize(v) {
-    return Math.floor(clamp(v)*255);
-  }
-
-  function makePaletteMapper(code) {
+  var makePaletteMapper=code=>{
       var paletteProgram=program(code);
       var palette=[];
       for (var i=0;i<256;i++){
         var r= byteSize(paletteProgram(i/256,0.0));
         var g= byteSize(paletteProgram(i/256,0.5));
         var b= byteSize(paletteProgram(i/256,1.0));
-        palette.push(b<<16|g<<8|r|0xFF000000);
+        palette.push(0xff<<24|b<<16|g<<8|r);
       }
-      function paletteMapper(v) {
-        return palette[byteSize(v)];
-      }
-      return paletteMapper;
+      return v=>palette[byteSize(v)];
   }
+  
+  var perlin=(x,y,wrapX=256,wrapY=wrapX)=> {    
+    var positiveMod=(v,size,q=v%size)=>q<0?size-q:q;
 
-/*
-  //this is the old form of stackie where the ops map was created on every pixel call.
-  function stacky(x,y,t,code) {
-    var s=[];
-    function bi(fn) { return function() { var b=s.pop(); s.push(fn(s.pop(),b)); } }
-    function un(fn) { return function() { s.push(fn(s.pop()));} }
-    function p(v) { return function() { s.push(v); } }
-    var ops={
-      "x": p(x),
-      "y": p(y),
-      "t": p(t),
-      "*": bi(function(a,b){return a*b}),    
-      "/": bi(function(a,b){return a/b}),    
-      "-": bi(function(a,b){return a-b}),
-      "+": bi(function(a,b){return a+b}),
-      "p": bi(perlin),
-      "s": un(Math.sin),
-      "c": un(Math.cos),
-      "q": un(Math.sqrt),
-      "a": bi(Math.atan2),
-      "r": un(random),
-      "<": bi(Math.min),
-      ">": bi(Math.max),
-      "l": un(Math.log),
-      "^": bi(Math.pow),
-      "P": p(Math.PI),
-      "~": un(Math.abs),
-      "!": un(function(x){return 1-x}),
-      ":": (function() {var a=s.pop();var b=s.pop();s.push(a); s.push(b);}),
-      ";": (function() {s=s.concat(s.splice(-3,3).reverse());}),
-      "d": (function() {var a=s.pop();s.push(a); s.push(a);})
-    }
+    var ss=(a,b,v,w=v*v*v*(v*(v*6-15)+10))=>(1.0-w)*a+(w*b); 
 
-    for (var d=0; d<10;d++) { ops[""+d]=p(d); }
+    var dg=(ix,iy,gi=(positiveMod(iy,wrapY)*wrapX+positiveMod(ix,wrapX))*2)=>((x-ix)*perlinGradientX[gi])+((y-iy)*perlinGradientY[gi]);
 
-    for (var i=0; i<code.length; i++) { ops[code[i]]();  }  
-    return s.pop();
-  }
-
-  function old_program(code) {
-     return function (x,y) {return stacky(x,y,code)}
-  }
-*/
-  function perlin(x,y,wrapX,wrapY) {
-    function positiveMod(v,size) {
-      v%=size;
-      return v<0?size-v:v;
-    }
-    wrapX = wrapX || 256;
-    wrapY = wrapY || wrapX;
-
-    function ss(a,b,v) {var w = v*v*v*(v*(v*6-15)+10);  return (1.0-w)*a + (w*b); }
-    function dg(ix,iy) {
-      var gi=(positiveMod(iy,wrapY)*wrapX+positiveMod(ix,wrapX))*2;
-      return ((x-ix)*gradient[gi]) + ((y-iy)*gradient[gi+1]);
-    }
-
-    var u=Math.floor(x);
-    var v=Math.floor(y);
+    var u=M.floor(x);
+    var v=M.floor(y);
     var sx=x-u; 
     var sy=y-v;
     var u1=(u+1);
@@ -202,28 +167,14 @@ var Stackie = function() {
     return ss(ss(dg(u,v),dg(u1,v),sx),ss(dg(u,v1),dg(u1,v1),sx),sy);
   }
 
-
-  function makeRandom(seed) {
-    var mw = seed & (bit30-1);
-    var mz = 173;
-    function random () {
-      mz=36969 * (mz&0xffff) + (mz >> 16);
-      mw=18000 * (mw&0xffff) + (mw >> 16);
-      return (((mz<<16) + mw) & (bit30-1) ) / (bit30);
-    }
-    return random;
-  }
-  var bit30=1<<30;
-  function generate(imageCode,paletteCode,size) {
-    size=size||256;
-    var f = new Field(size,size);
+  var generate=(imageCode,paletteCode,size=256) => {
+    var f = new Field(size);
     var paletteMapper = makePaletteMapper(paletteCode||"x");
     f.generate(program(imageCode));
     return f.getImageData(paletteMapper);
   }
 
-
-  API.makeField = function (w,h) { return new Field(w,h);}
+  API.makeField = (w,h)=>new Field(w,h);
   API.program=program;
   API.makeRandom=makeRandom;
   API.setSeed=setSeed;
@@ -231,6 +182,6 @@ var Stackie = function() {
   API.generate=generate;
 
   return API;
-}();
+})();
 
 
