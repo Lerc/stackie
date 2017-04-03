@@ -97,8 +97,8 @@ var Stackie = ( ()=> {
       "-": bi((a,b)=>a-b),
       "+": bi((a,b)=>a+b),
       "p": bi(perlin),
-      "w": stackOp(3,perlin),
-      "W": stackOp(4,perlin),
+      "w": stackOp(3,wrapPerlin),
+      "W": stackOp(4,wrapPerlin),
       "s": un(M.sin),
       "c": un(M.cos),
       "q": un(M.sqrt),
@@ -166,6 +166,8 @@ var Stackie = ( ()=> {
     var v1=(v+1);
     return ss(ss(dg(u,v),dg(u1,v),sx),ss(dg(u,v1),dg(u1,v1),sx),sy);
   }
+
+  var wrapPerlin=(x,y,wrapX=2,wrapY=wrapX)=>perlin(x*wrapX,y*wrapY,wrapX,wrapY);
 
   var generate=(imageCode,paletteCode,size=256) => {
     var f = new Field(size);
