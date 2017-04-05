@@ -58,11 +58,6 @@ var Stackie = ( ()=> {
       var image=new ImageData(w,h);
       var pixels= new Uint32Array(image.data.buffer);
       data.forEach((m,i)=>pixels[i]=map(m));
-      /*
-      for (var i=0; i<pixels.length; i++) {
-        pixels[i]=map(data[i]);
-      }
-      */
       return image;
     }
     var t=this;
@@ -133,11 +128,10 @@ var Stackie = ( ()=> {
   var program =code=>{
       var op=makeOp();
       return (x,y,t)=>{
-        var state = [];  //{"stack":[], "x":x, "y":y, "t":1};
+        var state = [];  
         state.x=x;
         state.y=y;
         state.t=t;
-        //for (var c=0; i<code.length; i++) {op(state,code[i]);}
         for (var c of code) op(state,c);
         return state.pop();
       }
