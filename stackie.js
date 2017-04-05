@@ -71,6 +71,8 @@ var Stackie = ( ()=> {
     t.getImageData = getImageData;
     t.generate=generate;
   }
+  var ss=(v,a=0,b=1,w=v*v*v*(v*(v*6-15)+10))=>(1.0-w)*a+(w*b); 
+  var positiveMod=(v,size,q=v%size)=>q<0?size-q:q;
 
   var makeOp= ()=>{
     var state;
@@ -99,6 +101,8 @@ var Stackie = ( ()=> {
       "p": bi(perlin),
       "w": stackOp(3,wrapPerlin),
       "W": stackOp(4,wrapPerlin),
+      "e": stackOp(1,ss),
+      "E": stackOp(3,ss),      
       "s": un(M.sin),
       "c": un(M.cos),
       "q": un(M.sqrt),
@@ -111,6 +115,8 @@ var Stackie = ( ()=> {
       "P": p(M.PI),
       "~": un(M.abs),
       "#": un(M.round),
+      "$": un(M.floor),
+      "%": stackOp(2,positiveMod),
       "!": un(x=>1-x),
       "?": un(x=>x<=0?0:1),
       ":": ()=> {var a=pop(), b=pop();push(a); push(b);},
@@ -152,9 +158,7 @@ var Stackie = ( ()=> {
   }
   
   var perlin=(x,y,wrapX=256,wrapY=wrapX)=> {    
-    var positiveMod=(v,size,q=v%size)=>q<0?size-q:q;
-
-    var ss=(a,b,v,w=v*v*v*(v*(v*6-15)+10))=>(1.0-w)*a+(w*b); 
+    
 
     var dg=(ix,iy,gi=(positiveMod(iy,wrapY)*wrapX+positiveMod(ix,wrapX))*2)=>((x-ix)*perlinGradientX[gi])+((y-iy)*perlinGradientY[gi]);
 
@@ -164,7 +168,7 @@ var Stackie = ( ()=> {
     var sy=y-v;
     var u1=(u+1);
     var v1=(v+1);
-    return ss(ss(dg(u,v),dg(u1,v),sx),ss(dg(u,v1),dg(u1,v1),sx),sy);
+    return ss(sy,ss(sx,dg(u,v),dg(u1,v)),ss(sx,dg(u,v1),dg(u1,v1)));
   }
 
   var wrapPerlin=(x,y,wrapX=2,wrapY=wrapX)=>perlin(x*wrapX,y*wrapY,wrapX,wrapY);
