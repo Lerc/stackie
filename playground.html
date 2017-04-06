@@ -2,7 +2,7 @@
 <html>
   <head>
   <meta charset='utf-8'>
-  <script src="stackie.js"></script>
+  <script src="stackie-min2.js"></script>
   <style>
   .meep {
   height : 336px;
@@ -161,22 +161,22 @@ button.seed {
       <li> <span class="opcode">;</span> : swap 1 and 3 on stack </li>
       <li>  <span class="opcode">+ - * /</span> : add, subtract, multiply, and  divide </li>
       <li>  <span class="opcode">#</span> : round to nearest int </li>
-      <li>  <span class="opcode">s</span> : sin </li>
-      <li>  <span class="opcode">c</span> : cos </li>
-      <li>  <span class="opcode">q</span> : sqrt </li>
+      <li>  <span class="opcode">$</span> : floor  </li>
+      <li>  <span class="opcode">s c q l</span> : sin, cos, sqrt, log</li>
+      <li>  <span class="opcode">e</span> : SmootherStep easing </li>
           
       <li>  <span class="opcode">P</span> : push PI </li>
       <li>  <span class="opcode">p</span> : perlin noise (using top two stack values) </li>
-      <li>  <span class="opcode">w</span> : wrapping perlin( 3 stack values x,y,w) </li>
-      <li>  <span class="opcode">W</span> : wrapping perlin( 4 stack values x,y,wx,wy) </li>
+      <li>  <span class="opcode">w</span> : wrapping perlin( 3 stack values x*w,y,w) </li>
+      <li>  <span class="opcode">W</span> : wrapping perlin( 4 stack values x*wx,y*wy,wx,wy) </li>
       <li>  <span class="opcode">a</span> : atan2</li>
       <li> <span class="opcode">~</span> : abs </li>
       <li> <span class="opcode">^</span> : pow </li>
       <li> <span class="opcode">!</span> : push(1-pop()) </li>
       <li> <span class="opcode">?</span> : push(0=>pop()0?0:1) </li>
 
-      <li> <span class="opcode">&gt</span> : max </li>
-      <li> <span class="opcode">&lt</span> : min </li>
+      <li> <span class="opcode">&gt &lt</span> : max, min </li>
+      <li> <span class="opcode">%</span> : mod   (positve result mod)   </li>
       </ul>
   </div>
   <div class="box right">
@@ -187,8 +187,7 @@ button.seed {
       <a href="?code=x1x-*5*">x1x-*5*</a><br>      
       <a href="?code=112%2Fx-d*-112%2Fy-d*-*">112/x-d*-112/y-d*-*</a><br>      
       <a href="?code=x1x-*y1y-*%2B12%2F%2Bd*x%2B">x1x-*y1y-*+12/+d*x+</a><br>      
-      <a href="?code=882**x*882**y*p12%2F%2B">882**x*882**y*p12/+</a><br>      
-
+      <a href="?code=xy882**w12%2F%2B">xy882**w12/+</a><br>      
       <a href="?code=x1x-*5*dx4**y3*p%2By!-">x1x-*5*dx4**y3*p+y!-</a><br>      
       <a href="?code=x12%2F-d*y12%2F-d*%2Bx88**s12%2F*12%2F%2By*%2B">x12/-d*y12/-d*+x88**s12/*12/+y*+</a><br>      
       <a href="?code=xx*1x-d*%2Byy*1y-d*%2B*x88**sy88**s%2B*">xx*1x-d*+yy*1y-d*+*x88**sy88**s+*</a><br>      
@@ -196,8 +195,8 @@ button.seed {
       <a href="?code=xy*d!*14%2F%2B2*5%5Ex12%2F-y12%2F-a6%2Bx12%2F-d*y12%2F-d*%2B88**p*">xy*d!*14/+2*5^x12/-y12/-a6+x12/-d*y12/-d*+88**p*</a><br>      
       <a href="?code=x8*y8*p1%2B2%2Fx2*y2*p%2Bx28**y28**p4%2F%2B112%2Fx-d*-112%2Fy-d*-*d*d*d*d**">x8*y8*p1+2/x2*y2*p+x28**y28**p4/+112/x-d*-112/y-d*-*d*d*d*d**</a><br>      
       <a href="?code=x12%2F-y12%2F-a6%2Bx12%2F-d*y12%2F-d*%2B88**p">x12/-y12/-a6+x12/-d*y12/-d*+88**p</a><br>      
-      <a href="?code=x12%2F-y12%2F-a6%2B8*x12%2F-d*y12%2F-d*%2Bqq82**p112%2Fx-d*-112%2Fy-d*-*d*d*d**dd*%2Bdd*%2Bdd*%2B">x12/-y12/-a6+8*x12/-d*y12/-d*+qq82**p112/x-d*-112/y-d*-*d*d*d**dd*+dd*+dd*+</a><br>      
-      <a href="?code=x1x-*y1y-*%2B12%2F%2B8%5Ex12%2F-y12%2F-a6%2Bx12%2F-d*y12%2F-d*%2B88**p12%2F%2B5%5E%2B">x1x-*y1y-*+12/+8^x12/-y12/-a6+x12/-d*y12/-d*+88**p12/+5^+</a><br>      
+      <a href="?code=x12%2F-y12%2F-aP%2F1%2B2%2Fx12%2F-d*y12%2F-d*%2Bq88*82*W14%2F%2B12%2Fx-d*12%2Fy-d*%2B!3^e*e~qe&palette=x8^xy-d%3F*~%2B">x12/-y12/-aP/1+2/ x12/-d*y12/-d*+q 88*82*W14/+ 12/x-d*12/y-d*+!3^e*e~qe</a><br>      
+      <a href="?code=x12/-y12/-:d;d;aP/1+2/;:d*:d*+qq482*W12/+">x12/-y12/-:d;d;aP/1+2/;:d*:d*+qq482*W12/+</a><br>      
     </div>
     </div>
   </div>
