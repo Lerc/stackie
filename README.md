@@ -5,9 +5,9 @@ This is what happens when you read about a 13k JavaScript competition right befo
 
 At 4am I was lying in bed awake because my brain was designing a tiny texture generator
 
-Today, I coded it.
+~~Today~~ A while ago, I coded it.
 
-As it stands, the minified javascript is 2531 bytes and it can generate ImageData textures from short strings. Chrome seems to be a bit slower than FireFox at running the code.  That FireFox runs it so well is a credit to their optimisers.
+As it stands, the minified javascript is 2069 bytes and it can generate ImageData textures from short strings. Chrome seems to be a bit slower than FireFox at running the code.  That FireFox runs it so well is a credit to their optimisers.
 
 Here it is in action http://fingswotidun.com/stackie/?code=x1x-*5*dx4**y3*p%2By!-&palette=xy!1%2B*&seed=877588
 
@@ -21,30 +21,35 @@ The design is sligtly similar to Ibniz except not focusing on live animation
 At its heart Stackie generates Fields, effectively greyscale images.   A simple palette mapping function to generate colour images is provided. More complex colour images will can be built with composing methods not (yet) provided. For now you will have to make your own compositors.  
 
 A simple x gradient is made by the code x
+
 ![](https://raw.github.com/Lerc/stackie/master/gallery/x.jpg)
 
 y is similialy easy
+
 ![](https://raw.github.com/Lerc/stackie/master/gallery/y.jpg)
 
 to multiply them together as  xy*
+
 ![](https://raw.github.com/Lerc/stackie/master/gallery/xy.jpg)
 
-Instructions
-###
+### Instructions
 
-pushes
+
+
+#### pushes
+
      x : push x (x is in range 0...1)
      y : push y (y is in range 0...1)
      0...9 : push constant 0...9
      r : push a random number
      P : push PI
+#### stack manipulation
 
-stack manipulation
      d : duplicate top item on the stack 
      : : swap top two items on the stack
      ; : swap top and third items on the stack
+#### Using 1 stack value
 
-Using 1 stack value
      s : sin 
      c : cos 
      q : sqrt 
@@ -57,8 +62,8 @@ Using 1 stack value
      e : smootherstep easing function    implemented as push(smootherStep(pop));
 
      ? : threshold  ( value<=0 becomes 0, value>0 becomes 1 );  
+#### Using 2 stack values
 
-using 2 stack values
      p : perlin noise (using top two stack values) 
 
      a : atan2 
@@ -69,14 +74,11 @@ using 2 stack values
      ^ : pow         
      > : max         
      < : min         
-
-Using 3 stack values
+#### Using 3 stack values
      E : smootherstep interpolation,  uses three stack values A B V.  Interpolates between A and B by V
      w : wraparound perlin noise using three stack values x,y,size  (x and y are multiplied by size)
-
-Using 4 stack values
+#### Using 4 stack values
      W : wraparound perlin noise using 4 stack values x,y,x_size, y_size (x is multiplied by x_size t is multiplied by y_size)
-
 
 `Stackie.program(code)` takes a string and returns a function(x,y) that returns a Number;
 
@@ -143,8 +145,7 @@ similarly you can use the Field object without the stack machine.
 	f.generate( (x,y)=>Math.abs(x-0.5)*y);
 ``` 
 
-###
-gallery
+### Gallery
 ![](https://raw.github.com/Lerc/stackie/master/gallery/a.jpg)
 ![](https://raw.github.com/Lerc/stackie/master/gallery/b.jpg)
 ![](https://raw.github.com/Lerc/stackie/master/gallery/c.jpg)
@@ -153,9 +154,7 @@ gallery
 ![](https://raw.github.com/Lerc/stackie/master/gallery/f.jpg)
 ![](https://raw.github.com/Lerc/stackie/master/gallery/g.jpg)
 
-###
-
-useful snippits
+### useful snippits
 ```        
     ;:             move the top of the stack two places down
     
