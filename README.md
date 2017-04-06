@@ -18,8 +18,16 @@ There is a doubly minified version that constructs itself by string substitution
 
 The design is sligtly similar to Ibniz except not focusing on live animation
 
-
 At its heart Stackie generates Fields, effectively greyscale images.   A simple palette mapping function to generate colour images is provided. More complex colour images will can be built with composing methods not (yet) provided. For now you will have to make your own compositors.  
+
+A simple x gradient is made by the code x
+![](https://raw.github.com/Lerc/stackie/master/gallery/x.jpg)
+
+y is similialy easy
+![](https://raw.github.com/Lerc/stackie/master/gallery/y.jpg)
+
+to multiply them together as  xy*
+![](https://raw.github.com/Lerc/stackie/master/gallery/xy.jpg)
 
 Instructions
 ###
@@ -136,6 +144,16 @@ similarly you can use the Field object without the stack machine.
 ``` 
 
 ###
+gallery
+![](https://raw.github.com/Lerc/stackie/master/gallery/a.jpg)
+![](https://raw.github.com/Lerc/stackie/master/gallery/b.jpg)
+![](https://raw.github.com/Lerc/stackie/master/gallery/c.jpg)
+![](https://raw.github.com/Lerc/stackie/master/gallery/d.jpg)
+![](https://raw.github.com/Lerc/stackie/master/gallery/e.jpg)
+![](https://raw.github.com/Lerc/stackie/master/gallery/f.jpg)
+![](https://raw.github.com/Lerc/stackie/master/gallery/g.jpg)
+
+###
 
 useful snippits
 ```        
@@ -155,3 +173,4 @@ useful snippits
 
     x88**sy29**c+2/24^^~0>x?!+  This makes a good contour line palette
 ```    
+
