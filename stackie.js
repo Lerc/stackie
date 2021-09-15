@@ -1,9 +1,6 @@
 var Stackie = ( ()=> {
   var random;    
-  var variables="tuvxyz";
   var M=Math;
-  
- 
   var intHash = x => {
     x *= 0xed5ad4bb;
     x ^= x >> 11;
@@ -130,7 +127,7 @@ var Stackie = ( ()=> {
       ";": ()=> {var a=pop(), b=pop(), c=pop();push(a); push(b); push(c);},
       "d": ()=> {var a=pop();push(a); push(a);}
     }
-    for (var v in variables) ops[variables[v]]=pushStateVar(variables[v]);
+    for (var v of "tuvxyz") ops[v]=pushStateVar(v);
 
     for (var i=0; i<10;i++) { ops[""+i]=p(i); }
 
