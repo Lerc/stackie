@@ -1,13 +1,32 @@
 var Stackie = ( ()=> {
-  var API={};
-  var bit30=1<<30;
   var random;    
   var variables="tuvxyz";
   var M=Math;
-
-  var perlinGradientX;
-  var perlinGradientY;
   
+ 
+  var intHash = x => {
+    x *= 0xed5ad4bb;
+    x ^= x >> 11;
+    x = M.imul(x,0xac4c1b51);
+    x ^= x >> 15;
+    x = M.imul(x,0x31848bab);
+    x ^= x >> 14;
+    return x;
+  }
+ 
+  var makeRandom = seed => {
+    let index=0;
+    let random = (x=index) => {
+      let pattern = intHash( (x + seed) & 0x7fffffff)
+      let intValue = intHash( (x + pattern)  & 0x7fffffff);
+      index=++x;
+      return intValue / 0x7fffffff;
+    }
+    return random;
+  }
+
+/*
+  var bit30=1<<30;
   var makeRandom=seed=>{
     var mw = seed & (bit30-1);
     var mz = 173;
@@ -18,17 +37,10 @@ var Stackie = ( ()=> {
     }
     return random;
   }
-
+*/
   var setSeed=seed=>{
     random=makeRandom(seed);
-    var s=256;
-    var randoms= new Float32Array(s*s*2).map(random);
-    perlinGradientX=randoms.map(v=>M.sin(v*M.PI*2));
-    perlinGradientY=randoms.map(v=>M.cos(v*M.PI*2));
   };
-
-  setSeed(42);
-
 
 /**
  * @constructor 
@@ -127,11 +139,9 @@ var Stackie = ( ()=> {
 
   var program =code=>{
       var op=makeOp();
-      return (x,y,t)=>{
-        var state = [];  
+      return (x,y,state = [])=>{
         state.x=x;
         state.y=y;
-        state.t=t;
         for (var c of code) op(state,c);
         return state.pop();
       }
@@ -142,10 +152,10 @@ var Stackie = ( ()=> {
   var makePaletteMapper=code=>{
       var paletteProgram=program(code);
       var palette=[];
-      for (var i=0;i<256;i++){
-        var r= byteSize(paletteProgram(i/256,0.0));
-        var g= byteSize(paletteProgram(i/256,0.5));
-        var b= byteSize(paletteProgram(i/256,1.0));
+      for (var i=0;i<1;i+=1/256){
+        var r= byteSize(paletteProgram(i,0.0));
+        var g= byteSize(paletteProgram(i,0.5));
+        var b= byteSize(paletteProgram(i,1.0));
         palette.push(0xff<<24|b<<16|g<<8|r);
       }
       return v=>palette[byteSize(v)];
@@ -154,7 +164,8 @@ var Stackie = ( ()=> {
   var perlin=(x,y,wrapX=256,wrapY=wrapX)=> {    
     
 
-    var dg=(ix,iy,gi=(positiveMod(iy,wrapY)*wrapX+positiveMod(ix,wrapX))*2)=>((x-ix)*perlinGradientX[gi])+((y-iy)*perlinGradientY[gi]);
+    var dg=(ix,iy,gi=random(positiveMod(iy,wrapY)*wrapX+positiveMod(ix,wrapX)*2)*M.PI*2)  =>
+            ((x-ix)*M.sin(gi)) + ((y-iy)*M.cos(gi));
 
     var u=M.floor(x);
     var v=M.floor(y);
@@ -174,13 +185,20 @@ var Stackie = ( ()=> {
     return f.getImageData(paletteMapper);
   }
 
-  API.makeField = (w,h)=>new Field(w,h);
-  API.program=program;
-  API.makeRandom=makeRandom;
-  API.setSeed=setSeed;
-  API.makePaletteMapper=makePaletteMapper;
-  API.generate=generate;
+  setSeed(42);
 
+  let API = {
+    makeField : (w,h)=>new Field(w,h),
+    program,
+    makeRandom,
+    setSeed,
+    makePaletteMapper,
+    generate,
+    perlin,
+    wrapPerlin,
+    random,
+  }
+ 
   return API;
 })();
 
