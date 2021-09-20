@@ -77,27 +77,22 @@ var Stackie = ( ()=> {
   }
   var ss=(v,a=0,b=1,w=v*v*v*(v*(v*6-15)+10))=>(1.0-w)*a+(w*b); 
   var positiveMod=(v,size,q=v%size)=>q<0?size-q:q;
+  var clamp = a=> a<0?0:a>1?1:a;
 
   var makeOp= ()=>{
     var state;
     var push=v=>state.push(v);
     var pop=()=>state.pop();
-
-    var stackOp=(argc,fn)=>( ()=>push(fn.apply(null,state.splice(-argc,argc))) );
+    
+    var stackOp=(argc,fn)=>()=>push(fn(...state.splice(-argc,argc))) ;
 
     var bi= fn=>(()=>{var b=pop(); push(fn(pop(),b));});
     var un= fn=>( ()=>push(fn(pop())) );
     var p= v=>( ()=>push(v));
 
-/*    
-    function bi(fn) { return ()=>{var b=pop(); push(fn(pop(),b));}}
-    function un(fn) { return ()=>push(fn(pop()));}
-    function p(v) { return ()=>push(v); }
-*/
     var pushStateVar=name=>(()=>push(state[name]));
-
+    
     var ops={
-      //"x": pushStateVar("x"),"y": pushStateVar("y"),"t": pushStateVar("t"),
       "*": bi((a,b)=>a*b),    
       "/": bi((a,b)=>a/b),    
       "-": bi((a,b)=>a-b),
@@ -120,16 +115,17 @@ var Stackie = ( ()=> {
       "~": un(M.abs),
       "#": un(M.round),
       "$": un(M.floor),
+      "C": un(clamp),
       "%": stackOp(2,positiveMod),
       "!": un(x=>1-x),
       "?": un(x=>x<=0?0:1),
-      ":": ()=> {var a=pop(), b=pop();push(a); push(b);},
-      ";": ()=> {var a=pop(), b=pop(), c=pop();push(a); push(b); push(c);},
-      "d": ()=> {var a=pop();push(a); push(a);}
+      ":": ()=> state.push(pop(),pop()),
+      ";": ()=> state.push(pop(),pop(),pop()),
+      "d": ()=> {var a=pop(); state.push(a,a)}
     }
+    
     for (var v of "tuvxyz") ops[v]=pushStateVar(v);
-
-    for (var i=0; i<10;i++) { ops[""+i]=p(i); }
+    for (var i=0; i<10;ops[""+i]=p(i++));
 
     return (programState,opcode)=>{ state=programState; ops[opcode](); };
   }
@@ -143,8 +139,7 @@ var Stackie = ( ()=> {
         return state.pop();
       }
   }
-  var clamp=v=>v<0?0:v>1?1:v;
-  var byteSize=v=>M.floor(clamp(v)*255);
+  var byteSize=v=>0|(clamp(v)*255);
 
   var makePaletteMapper=code=>{
       var paletteProgram=program(code);
@@ -164,8 +159,8 @@ var Stackie = ( ()=> {
     var dg=(ix,iy,gi=random(positiveMod(iy,wrapY)*wrapX+positiveMod(ix,wrapX)*2)*M.PI*2)  =>
             ((x-ix)*M.sin(gi)) + ((y-iy)*M.cos(gi));
 
-    var u=M.floor(x);
-    var v=M.floor(y);
+    var u=0|x;
+    var v=0|y;
     var sx=x-u; 
     var sy=y-v;
     var u1=(u+1);
